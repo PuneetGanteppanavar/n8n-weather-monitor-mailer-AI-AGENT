@@ -1,0 +1,146 @@
+{
+  "name": "Wether monitering agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -112
+      ],
+      "id": "c7526409-e285-435c-a5d2-336a0b18d7de",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -464,
+        64
+      ],
+      "id": "7d0bcb38-61fe-4062-a9db-6b444974e3b8",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=15.3478&longitude=75.1338&hourly=temperature_2m",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "de5a5346-dcac-439f-93c2-c25bb15f230a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input JSON data\nconst weatherData = items[0].json;\n\n// Extract the hourly temperature array\nconst temperatures = weatherData.hourly.temperature_2m;\n\n// Find the highest and lowest temperatures\nconst maxTemp = Math.max(...temperatures);\nconst minTemp = Math.min(...temperatures);\n\n// Prepare the message\nconst message = `In Hubballi, the high temperature is ${maxTemp}°C and low temperature is ${minTemp}°C.`;\n\n// Return as output\nreturn [\n  {\n    json: {\n      message: message\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        0
+      ],
+      "id": "2ec4165f-e4ea-4501-b89b-9b4f6f26d4b1",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "sendTo": "princepuneetpg@gmail.com",
+        "subject": "todays whether",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        336,
+        0
+      ],
+      "id": "ba1861ae-ee3a-4e67-baf5-106c0707e35c",
+      "name": "Send a message",
+      "webhookId": "89f0191a-5f8e-4c08-abbd-ebb481891128",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GOx9anCgBj6T6HpY",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3be8966e-0f52-423e-a943-18c16585b8af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4048bac3cb5c416b5255e006196a85107b0792f1b5735e208b30cfe3bbaeed13"
+  },
+  "id": "2F8T8kkOUYWrU9Fg",
+  "tags": []
+}
